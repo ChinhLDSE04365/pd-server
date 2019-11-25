@@ -106,6 +106,7 @@ userRoutes.route('/updateUAvatar').post(function (req, res) {
     let sql = `UPDATE user SET user_avatar=? WHERE uID=?`;
 
     let query = mysql.format(sql, [uAvatar,parseInt(uid)]);
+    console.log(query);
     
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
@@ -133,8 +134,37 @@ userRoutes.route('/insertUser').post(function (req, res) {
     let sql = `INSERT INTO user (user_email, user_location, user_name, user_avatar, user_gender) VALUES (?,?,?,?,?)`;
 
     let query = mysql.format(sql, [uEmail,parseInt(uLoca),uName,uAvatar,uGender]);
-    console.log(query);
     
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+//Update user profile
+userRoutes.route('/updateUser').post(function (req, res) {
+  var uID = req.body.uID;
+  var uLoca  = req.body.uLoca;
+  var uName = req.body.uName;
+  var uGender = req.body.uGen;
+  var uAddress = req.body.uAdr;
+  var uDOB = req.body.uDOB;
+  var uPhone = req.body.uPhone;
+  var uPrivacy = req.body.uPri;
+  if (uID) {
+    let sql = `UPDATE user SET user_location=?, user_name=?, user_gender=?, user_phone=?, user_dob=?, user_address=?, privacy=? 
+              WHERE uID = ?`;
+
+    let query = mysql.format(sql, [parseInt(uLoca),uName,uGender,uPhone,uDOB,uAddress,uPrivacy, parseInt(uID)]);
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {

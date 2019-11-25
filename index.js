@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 const userRoute = require('./route/User_route');
 const petRoute = require('./route/Pet_route');
 const cmRoute = require('./route/Common_route');
-const accRoute = require('./route/Account_route');
+const webRoute = require('./route/Web_route');
 app.get('/favicon.ico', (req, res) => res.status(204));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -32,7 +32,7 @@ app.use(function (req, res, next) {
 app.use('/user', userRoute);
 app.use('/pet', petRoute);
 app.use('/cm', cmRoute);
-app.use('/acc', accRoute);
+app.use('/web', webRoute);
 // app.use('/trans',transRoute);
 app.listen(PORT, function () {
   console.log('Server is running on Port:', PORT);
