@@ -76,6 +76,27 @@ cmRoute.route('/breedBySP').get(function (req, res) {
     }
 });
 
-
+//insert new img
+cmRoute.route('/insertIMG').post(function (req, res) {
+    var uid = req.body.uid;
+    var imgURL = req.body.imgURL;
+    if (uid) {
+      let sql = `INSERT INTO multimedia_storage(user_id, mURL) VALUES (?,?)`;
+      let query = mysql.format(sql, [parseInt(uid),imgURL]);
+      
+      createConnection(function (err, connection) {
+        // do whatever you want with your connection here
+        connection.query(query, function (error, results, fields) {
+          connection.release();
+          if (error) {
+            return res.status(404).send("404-Not Found");
+          }
+          return res.status(200).json(results);
+        });
+      });
+    } else {
+      return res.status(400).send("400-Bad Request");
+    }
+  });
 
 module.exports = cmRoute;
