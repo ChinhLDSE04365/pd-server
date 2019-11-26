@@ -125,15 +125,12 @@ userRoutes.route('/updateUAvatar').post(function (req, res) {
 
 //Insert new user
 userRoutes.route('/insertUser').post(function (req, res) {
-  var uEmail = req.body.uEmail;
-  var uLoca  = req.body.uLoca;
-  var uName = req.body.uName;
-  var uAvatar = req.body.uAvatar;
-  var uGender = req.body.uGen;
+  const {uEmail,uLoca,uName,uAvatar,uGen} = req.body;
+
   if (uEmail) {
     let sql = `INSERT INTO user (user_email, user_location, user_name, user_avatar, user_gender) VALUES (?,?,?,?,?)`;
 
-    let query = mysql.format(sql, [uEmail,parseInt(uLoca),uName,uAvatar,uGender]);
+    let query = mysql.format(sql, [uEmail,parseInt(uLoca),uName,uAvatar,uGen]);
     
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
@@ -151,19 +148,13 @@ userRoutes.route('/insertUser').post(function (req, res) {
 });
 //Update user profile
 userRoutes.route('/updateUser').post(function (req, res) {
-  var uID = req.body.uID;
-  var uLoca  = req.body.uLoca;
-  var uName = req.body.uName;
-  var uGender = req.body.uGen;
-  var uAddress = req.body.uAdr;
-  var uDOB = req.body.uDOB;
-  var uPhone = req.body.uPhone;
-  var uPrivacy = req.body.uPri;
+  const {uID,uLoca,uName,uGen,uAdr,uDOB,uPhone,uPri} = req.body;
+
   if (uID) {
     let sql = `UPDATE user SET user_location=?, user_name=?, user_gender=?, user_phone=?, user_dob=?, user_address=?, privacy=? 
               WHERE uID = ?`;
 
-    let query = mysql.format(sql, [parseInt(uLoca),uName,uGender,uPhone,uDOB,uAddress,uPrivacy, parseInt(uID)]);
+    let query = mysql.format(sql, [parseInt(uLoca),uName,uGen,uPhone,uDOB,uAdr,uPri, parseInt(uID)]);
 
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
