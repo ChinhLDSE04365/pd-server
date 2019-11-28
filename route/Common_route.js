@@ -77,12 +77,12 @@ cmRoute.route('/breedBySP').get(function (req, res) {
 });
 
 //insert new img
-cmRoute.route('/insertIMG').post(function (req, res) {
-    var uid = req.body.uid;
-    var imgURL = req.body.imgURL;
-    if (uid) {
-      let sql = `INSERT INTO multimedia_storage(user_id, mURL) VALUES (?,?)`;
-      let query = mysql.format(sql, [parseInt(uid),imgURL]);
+cmRoute.route('/multimedia').post(function (req, res) {
+    var data =req.body;
+    if (data) {
+      let sql = `INSERT INTO multimedia_storage SET ?`;
+      let query = mysql.format(sql, [data]);
+      console.log(query);
       
       createConnection(function (err, connection) {
         // do whatever you want with your connection here

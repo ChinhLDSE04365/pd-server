@@ -98,39 +98,15 @@ userRoutes.route('/getFollowedByID').get(function (req, res) {
   }
 });
 
-//update User_Avatar
-userRoutes.route('/updateUAvatar').post(function (req, res) {
-  var uid = req.body.uid;
-  var uAvatar = req.body.uAvatar;
-  if (uid) {
-    let sql = `UPDATE user SET user_avatar=? WHERE uID=?`;
-
-    let query = mysql.format(sql, [uAvatar,parseInt(uid)]);
-    console.log(query);
-    
-    createConnection(function (err, connection) {
-      // do whatever you want with your connection here
-      connection.query(query, function (error, results, fields) {
-        connection.release();
-        if (error) {
-          return res.status(404).send("404-Not Found");
-        }
-        return res.status(200).json(results);
-      });
-    });
-  } else {
-    return res.status(400).send("400-Bad Request");
-  }
-});
 
 //Insert new user
-userRoutes.route('/insertUser').post(function (req, res) {
-  const {uEmail,uLoca,uName,uAvatar,uGen} = req.body;
+userRoutes.route('/users').post(function (req, res) {
+  var data = req.body;
 
-  if (uEmail) {
-    let sql = `INSERT INTO user (user_email, user_location, user_name, user_avatar, user_gender) VALUES (?,?,?,?,?)`;
+  if (data) {
+    let sql = `INSERT INTO user SET ?`;
 
-    let query = mysql.format(sql, [uEmail,parseInt(uLoca),uName,uAvatar,uGen]);
+    let query = mysql.format(sql, [data]);
     
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
@@ -146,16 +122,16 @@ userRoutes.route('/insertUser').post(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
-//Update user profile
-userRoutes.route('/updateUser').post(function (req, res) {
-  const {uID,uLoca,uName,uGen,uAdr,uDOB,uPhone,uPri} = req.body;
+//update user by UID
+userRoutes.route('/users/:uid').put(function (req, res) {
+  var uid = req.params.uid;
+  var data = req.body;
+  if (uid) {
+    let sql = `UPDATE user SET ? WHERE uID=?`;
 
-  if (uID) {
-    let sql = `UPDATE user SET user_location=?, user_name=?, user_gender=?, user_phone=?, user_dob=?, user_address=?, privacy=? 
-              WHERE uID = ?`;
-
-    let query = mysql.format(sql, [parseInt(uLoca),uName,uGen,uPhone,uDOB,uAdr,uPri, parseInt(uID)]);
-
+    let query = mysql.format(sql, [data,parseInt(uid)]);
+    console.log(query);
+    
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {

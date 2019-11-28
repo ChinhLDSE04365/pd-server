@@ -48,7 +48,7 @@ petRoute.route('/getPetBypID').get(function (req, res) {
 petRoute.route('/getPetByuID').get(function (req, res) {
   let uid = req.query.uid;
   if (uid) {
-    let sql = "SELECT * FROM pet WHERE user_id= ? ORDER BY petID ASC";
+    let sql = "SELECT * FROM pet WHERE user_id= ? and p_status=1 ORDER BY petID ASC";
     let query = mysql.format(sql, parseInt(uid));
     createConnection(function (err, connection) {
       connection.query(query, function (error, results, fields) {
@@ -147,6 +147,7 @@ petRoute.route('/datingAu').get(function (req, res) {
     createConnection(function (err, connection) {
       connection.query(query, function (error, results, fields) {
         connection.release();
+    let sql = `UPDATE pet SET ? WHERE petID=?`;
         if (error) {
           return res.status(404).send("404-Not Found");
         }
@@ -301,11 +302,11 @@ petRoute.route('/ignorPet').get(function (req, res) {
 });
 
 //get breed for RNPickerSelect by ps_id
-petRoute.route('/getBreedBySP').get(function (req, res) {
-  const {sp} = req.query;
-  if (sp) {
+petRoute.route('/breeds/:psID').get(function (req, res) {
+  var psID = req.params.psID;
+  if (psID) {
     let sql = `SELECT pb_name as label, pbID as value FROM pet_breed WHERE ps_id = ? and pb_status=1 ORDER BY pb_name ASC`;
-    let query = mysql.format(sql, [parseInt(sp)]);
+    let query = mysql.format(sql, [parseInt(psID)]);
     //thực hiện câu lệnh query
     createConnection(function (err, connection) {
       connection.query(query, function (error, results, fields) {
@@ -321,7 +322,7 @@ petRoute.route('/getBreedBySP').get(function (req, res) {
   }
 });
 //get species fro RNPickerSelect
-petRoute.route('/getSpecies').get(function (req, res) {
+petRoute.route('/species').get(function (req, res) {
   let sql = `SELECT ps_name as label, psID as value FROM pet_species WHERE ps_status=1 ORDER BY psID ASC`;
   //thực hiện câu lệnh query
   createConnection(function (err, connection) {
@@ -337,13 +338,36 @@ petRoute.route('/getSpecies').get(function (req, res) {
 });
 
 //insert new pet
-petRoute.route('/insertPet').post(function (req, res) {
-  const {uID,pbID,locaID,pName,pDOB,pGen,pAvatar,pIntro} = req.body;
-  if (pName) {
-    let sql = `INSERT INTO pet( user_id, pb_id, location_id, p_name, p_dob, p_gender, p_avatar, introduction) 
-                VALUES (?,?,?,?,?,?,?,?)`;
+petRoute.route('/pets').post(function (req, res) {
+  var data = req.body;
+  if (data) {
+    let sql = `INSERT INTO pet SET ?`;
 
-    let query = mysql.format(sql, [parseInt(uID), parseInt(pbID), parseInt(locaID), pName, pDOB, pGen, pAvatar, pIntro]);
+    let query = mysql.format(sql, [data]);
+    console.log(query);
+
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+//update pet
+petRoute.route('/pets/:petID').put(function (req, res) {
+  var petID = req.params.petID;
+  var data = req.body;
+  if (petID) {
+    let sql = `UPDATE pet SET ? WHERE petID=?`;
+
+    let query = mysql.format(sql, [data,parseInt(petID)]);
     console.log(query);
 
     createConnection(function (err, connection) {
