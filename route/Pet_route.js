@@ -5,7 +5,7 @@ const mysql = require('mysql');
 
 //get all pets from db
 petRoute.route('/').get(function (req, res) {
-  let sql = "Select * FROM pet where petID";
+  let sql = "Select * FROM pet ORDER BY petID ASC";
   //thực hiện câu lệnh query
   createConnection(function (err, connection) {
     connection.query(sql, function (error, results, fields) {
@@ -19,36 +19,13 @@ petRoute.route('/').get(function (req, res) {
 
 });
 
-//get pet by petID
-//domain/pet/getPetBypID?pid=
-petRoute.route('/getPetBypID').get(function (req, res) {
-  let pid = req.query.pid;
-  if (pid) {
-    let sql = `SELECT pet.*,pet_breed.ps_id,pet_breed.pb_name FROM pet 
-              LEFT JOIN pet_breed ON pet.pb_id=pet_breed.pbID
-              WHERE pet.petID=? and pet.p_status=1`;
-    let query = mysql.format(sql, [parseInt(pid)]);
-    createConnection(function (err, connection) {
-      connection.query(query, function (error, results, fields) {
-        connection.release();
-        if (error) {
-          return res.status(404).send("404-Not Found");
-        }
-
-        return res.status(200).json(results);
-      });
-    });
-  } else {
-    return res.status(400).send("400-Bad Request");
-  }
-});
 
 //get pet by userID
 //domain/pet/getPetByuID?uid=
 petRoute.route('/getPetByuID').get(function (req, res) {
   let uid = req.query.uid;
   if (uid) {
-    let sql = "SELECT * FROM pet WHERE user_id= ? and p_status=1 ORDER BY petID ASC";
+    let sql = "SELECT * FROM pet WHERE user_id= ? and isRemove=0 ORDER BY petID ASC";
     let query = mysql.format(sql, parseInt(uid));
     createConnection(function (err, connection) {
       connection.query(query, function (error, results, fields) {
@@ -100,7 +77,7 @@ petRoute.route('/datingAu').get(function (req, res) {
     INNER JOIN user ON pet.user_id=user.uID
     INNER JOIN location ON pet.location_id = location.locaID
     LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender!=? and user.uID!=? and pet.petID NOT IN 
+    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
     (SELECT pet_id from pet_ignorance where user_id=?)
     GROUP BY pet.petID)`;
     let query1 = mysql.format(withclause1, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -109,7 +86,7 @@ petRoute.route('/datingAu').get(function (req, res) {
     INNER JOIN user ON pet.user_id=user.uID
     INNER JOIN location ON pet.location_id = location.locaID
     LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id!=? and pet.p_gender!=? and user.uID!=? and pet.petID NOT IN 
+    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id!=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
     (SELECT pet_id from pet_ignorance where user_id=?)
     GROUP BY pet.petID)`;
     let query2 = mysql.format(withclause2, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -173,7 +150,7 @@ petRoute.route('/datingMn').get(function (req, res) {
       INNER JOIN user ON pet.user_id=user.uID
       INNER JOIN location ON pet.location_id = location.locaID
       LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-      WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender=? and user.uID!=? and pet.petID NOT IN 
+      WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
       (SELECT pet_id from pet_ignorance where user_id=?)
       GROUP BY pet.petID)`;
     let query1 = mysql.format(withclause1, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -337,6 +314,30 @@ petRoute.route('/species').get(function (req, res) {
 
 });
 
+//get pes by pID
+petRoute.route('/pets/:pid').get(function (req, res) {
+  var pid = req.params.pid;
+  if (pid) {
+    let sql = `SELECT pet.*,pet_breed.ps_id,pet_breed.pb_name FROM pet 
+    LEFT JOIN pet_breed ON pet.pb_id=pet_breed.pbID
+    WHERE pet.petID=? and pet.isRemove=0`;
+
+    let query = mysql.format(sql, [parseInt(pid)]);
+
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
 //insert new pet
 petRoute.route('/pets').post(function (req, res) {
   var data = req.body;

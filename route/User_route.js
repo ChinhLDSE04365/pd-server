@@ -4,27 +4,7 @@ const createConnection = require('../MySQLConnection');
 const mysql = require('mysql');
 
 
-//get User by uID
-userRoutes.route('/getUserByID').get(function (req, res) {
-  var id = req.query.id;
-  if (id) {
-    let sql = "Select * FROM user where uID=  ?";
-    let query = mysql.format(sql, parseInt(id));
 
-    createConnection(function (err, connection) {
-      // do whatever you want with your connection here
-      connection.query(query, function (error, results, fields) {
-        connection.release();
-        if (error) {
-          return res.status(404).send("404-Not Found");
-        }
-        return res.status(200).json(results);
-      });
-    });
-  } else {
-    return res.status(400).send("400-Bad Request");
-  }
-});
 //get User by email
 userRoutes.route('/getUserByEmail').get(function (req, res) {
   var email = req.query.em;
@@ -98,6 +78,31 @@ userRoutes.route('/getFollowedByID').get(function (req, res) {
   }
 });
 
+//get user by uid
+userRoutes.route('/users/:uid').get(function (req, res) {
+  var uid = req.params.uid;
+
+  if (uid) {
+    let sql = `Select user.*, location.locaName FROM user
+    INNER JOIN location ON user.user_location=location.locaID
+    where user.uID= ?`;
+
+    let query = mysql.format(sql, [parseInt(uid)]);
+    
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
 
 //Insert new user
 userRoutes.route('/users').post(function (req, res) {
@@ -147,5 +152,27 @@ userRoutes.route('/users/:uid').put(function (req, res) {
   }
 });
 
+//check followed
+userRoutes.route('/checkFollow').get(function (req, res) {
+  var myid = req.query.myid;
+  var urid = req.query.urid;
+  if (myid && urid) {
+    let sql = `SELECT * FROM followed WHERE follower_id=? and followed_id=?`;
+
+    let query = mysql.format(sql, [parseInt(myid),parseInt(urid)]);
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
 
 module.exports = userRoutes;
