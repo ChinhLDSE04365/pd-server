@@ -175,4 +175,69 @@ userRoutes.route('/checkFollow').get(function (req, res) {
   }
 });
 
+userRoutes.route('/useFollow').post(function (req, res) {
+  var data = req.body;
+  if (data) {
+    let sql = `INSERT INTO followed SET ? `;
+
+    let query = mysql.format(sql, [data]);
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+userRoutes.route('/useFollow').delete(function (req, res) {
+  var myid = req.body.myid;
+  var urid = req.body.urid;
+  if (myid&&urid) {
+    let sql = `DELETE FROM followed WHERE  follower_id=? and followed_id=?`;
+
+    let query = mysql.format(sql, [parseInt(myid), parseInt(urid)]);
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+
+//select images that uploaded by the user
+userRoutes.route('/images/:uid').get(function (req, res) {
+  var uid = req.params.uid;
+  if (uid) {
+    let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC LIMIT 4`;
+
+    let query = mysql.format(sql, [parseInt(uid)]);
+    
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+
 module.exports = userRoutes;
