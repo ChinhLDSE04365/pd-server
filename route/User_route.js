@@ -217,11 +217,33 @@ userRoutes.route('/useFollow').delete(function (req, res) {
   }
 });
 
-//select images that uploaded by the user
+//select limit images that uploaded by the user
 userRoutes.route('/images/:uid').get(function (req, res) {
   var uid = req.params.uid;
   if (uid) {
     let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC LIMIT 4`;
+
+    let query = mysql.format(sql, [parseInt(uid)]);
+    
+    createConnection(function (err, connection) {
+      // do whatever you want with your connection here
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+//select all images that uploaded by the user
+userRoutes.route('/imagesAll/:uid').get(function (req, res) {
+  var uid = req.params.uid;
+  if (uid) {
+    let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC`;
 
     let query = mysql.format(sql, [parseInt(uid)]);
     
