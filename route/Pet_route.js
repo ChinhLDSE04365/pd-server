@@ -386,4 +386,27 @@ petRoute.route('/pets/:petID').put(function (req, res) {
   }
 });
 
+petRoute.route('/featureImgs/:pid').get(function (req, res) {
+  let pet_id = req.params.pid;
+  if (pet_id) {
+    let sql = `SELECT pi.*, ms.* FROM pet_images as pi    
+    RIGHT JOIN multimedia_storage as ms ON pi.ms_id=ms.mID
+    WHERE pet_id=? `;
+    let query = mysql.format(sql, [parseInt(pet_id)]);
+    console.log(query);
+    
+    createConnection(function (err, connection) {
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+
 module.exports = petRoute;
