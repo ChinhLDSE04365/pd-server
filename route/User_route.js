@@ -88,7 +88,7 @@ userRoutes.route('/users/:uid').get(function (req, res) {
     where user.uID= ?`;
 
     let query = mysql.format(sql, [parseInt(uid)]);
-    
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -112,7 +112,7 @@ userRoutes.route('/users').post(function (req, res) {
     let sql = `INSERT INTO user SET ?`;
 
     let query = mysql.format(sql, [data]);
-    
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -134,9 +134,9 @@ userRoutes.route('/users/:uid').put(function (req, res) {
   if (uid) {
     let sql = `UPDATE user SET ? WHERE uID=?`;
 
-    let query = mysql.format(sql, [data,parseInt(uid)]);
+    let query = mysql.format(sql, [data, parseInt(uid)]);
     console.log(query);
-    
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -159,7 +159,7 @@ userRoutes.route('/checkFollow').get(function (req, res) {
   if (myid && urid) {
     let sql = `SELECT * FROM followed WHERE follower_id=? and followed_id=?`;
 
-    let query = mysql.format(sql, [parseInt(myid),parseInt(urid)]);
+    let query = mysql.format(sql, [parseInt(myid), parseInt(urid)]);
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -198,7 +198,7 @@ userRoutes.route('/useFollow').post(function (req, res) {
 userRoutes.route('/useFollow').delete(function (req, res) {
   var myid = req.body.myid;
   var urid = req.body.urid;
-  if (myid&&urid) {
+  if (myid && urid) {
     let sql = `DELETE FROM followed WHERE  follower_id=? and followed_id=?`;
 
     let query = mysql.format(sql, [parseInt(myid), parseInt(urid)]);
@@ -224,7 +224,7 @@ userRoutes.route('/images/:uid').get(function (req, res) {
     let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC LIMIT 4`;
 
     let query = mysql.format(sql, [parseInt(uid)]);
-    
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -246,7 +246,7 @@ userRoutes.route('/imagesAll/:uid').get(function (req, res) {
     let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC`;
 
     let query = mysql.format(sql, [parseInt(uid)]);
-    
+
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -260,6 +260,32 @@ userRoutes.route('/imagesAll/:uid').get(function (req, res) {
   } else {
     return res.status(400).send("400-Bad Request");
   }
+});
+
+//select all images that uploaded by the user
+userRoutes.route('/search').get(function (req, res) {
+  var kw = req.query.keyword;
+  var ownid = req.query.ownid;
+  let sql = `SELECT user.*, COUNT(fo.follower_id) as NOF FROM user 
+    LEFT JOIN followed as fo ON user.uID = fo.followed_id
+    WHERE MATCH (user.user_name) AGAINST (? IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION) AND user.uID!= ?
+    GROUP BY user.uID
+    ORDER BY NOF DESC`;
+
+  let query = mysql.format(sql, [kw, parseInt(ownid)]);
+  console.log(query);
+
+  createConnection(function (err, connection) {
+    // do whatever you want with your connection here
+    connection.query(query, function (error, results, fields) {
+      connection.release();
+      if (error) {
+        return res.status(404).send("404-Not Found");
+      }
+      return res.status(200).json(results);
+    });
+  });
+
 });
 
 module.exports = userRoutes;
