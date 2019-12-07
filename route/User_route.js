@@ -262,7 +262,7 @@ userRoutes.route('/imagesAll/:uid').get(function (req, res) {
   }
 });
 
-//select all images that uploaded by the user
+//search user_name by keyword
 userRoutes.route('/search').get(function (req, res) {
   var kw = req.query.keyword;
   var ownid = req.query.ownid;

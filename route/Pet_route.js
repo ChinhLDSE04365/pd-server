@@ -385,13 +385,13 @@ petRoute.route('/pets/:petID').put(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
-
+//get featured images
 petRoute.route('/featureImgs/:pid').get(function (req, res) {
   let pet_id = req.params.pid;
   if (pet_id) {
-    let sql = `SELECT pi.*, ms.* FROM pet_images as pi    
-    RIGHT JOIN multimedia_storage as ms ON pi.ms_id=ms.mID
-    WHERE pet_id=? `;
+    let sql = `SELECT * from pet_feature WHERE pet_id=? 
+    ORDER BY created_at DESC
+    LIMIT 6`;
     let query = mysql.format(sql, [parseInt(pet_id)]);
     console.log(query);
     
@@ -408,5 +408,54 @@ petRoute.route('/featureImgs/:pid').get(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
+
+//insert featured image
+petRoute.route('/featureImgs').post(function (req, res) {
+  let data = req.body;
+  if (data) {
+    let sql = `INSERT INTO pet_feature SET ?`;
+    let query = mysql.format(sql, [data]);
+    console.log(query);
+    
+    createConnection(function (err, connection) {
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+
+//update featured image
+petRoute.route('/featureImgs/:pid').put(function (req, res) {
+  let pid = req.params.pid;
+  let oldURL = req.body.oldURL;
+  let newURL = req.body.newURL;
+  
+  if (pid && oldURL&&newURL) {
+    let sql = `UPDATE pet_feature SET img_URL= ? WHERE pet_id=? and img_URL=?`;
+    let query = mysql.format(sql, [newURL,parseInt(pid),oldURL]);
+    console.log(query);
+    
+    createConnection(function (err, connection) {
+      connection.query(query, function (error, results, fields) {
+        connection.release();
+        if (error) {
+          return res.status(404).send("404-Not Found");
+        }
+        return res.status(200).json(results);
+      });
+    });
+  } else {
+    return res.status(400).send("400-Bad Request");
+  }
+});
+
+
 
 module.exports = petRoute;
