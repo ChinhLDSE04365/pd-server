@@ -175,7 +175,7 @@ userRoutes.route('/checkFollow').get(function (req, res) {
   }
 });
 
-userRoutes.route('/useFollow').post(function (req, res) {
+userRoutes.route('/userFollow').post(function (req, res) {
   var data = req.body;
   if (data) {
     let sql = `INSERT INTO followed SET ? `;
@@ -195,7 +195,7 @@ userRoutes.route('/useFollow').post(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
-userRoutes.route('/useFollow').delete(function (req, res) {
+userRoutes.route('/userFollow').delete(function (req, res) {
   var myid = req.body.myid;
   var urid = req.body.urid;
   if (myid && urid) {
@@ -241,12 +241,15 @@ userRoutes.route('/images/:uid').get(function (req, res) {
 });
 //select all images that uploaded by the user
 userRoutes.route('/imagesAll/:uid').get(function (req, res) {
+  let limit = 15;
   var uid = req.params.uid;
+  var page = req.query.page;
+  var offset = (page - 1) * limit;
   if (uid) {
-    let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC`;
+    let sql = `SELECT * FROM multimedia_storage WHERE user_id=? ORDER BY uploaded_at DESC
+              LIMIT ?,?`;
 
-    let query = mysql.format(sql, [parseInt(uid)]);
-
+    let query = mysql.format(sql, [parseInt(uid),offset, limit]);
     createConnection(function (err, connection) {
       // do whatever you want with your connection here
       connection.query(query, function (error, results, fields) {
@@ -287,5 +290,6 @@ userRoutes.route('/search').get(function (req, res) {
   });
 
 });
+
 
 module.exports = userRoutes;
