@@ -178,7 +178,7 @@ postRoutes.route('/likePost').post(function (req, res) {
         let sql = `INSERT INTO post_reaction SET ?`;
 
         let query = mysql.format(sql, [data]);
-        
+
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
             connection.query(query, function (error, results, fields) {
@@ -202,7 +202,7 @@ postRoutes.route('/unlikePost').delete(function (req, res) {
         let sql = `DELETE FROM post_reaction WHERE post_id=? and user_id=?`;
 
         let query = mysql.format(sql, [parseInt(post_id), parseInt(user_id)]);
-        
+
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
             connection.query(query, function (error, results, fields) {
@@ -224,7 +224,7 @@ postRoutes.route('/topPosts/:uid').get(function (req, res) {
     var page = req.query.page;
     var limit = 6;
     var offset = (page - 1) * limit;
-    if (uid &&page ) {
+    if (uid && page) {
         let sql = `WITH T1 AS (SELECT fed.followed_id as userID, COUNT(fed.follower_id) as NOF FROM followed as fed
         WHERE fed.followed_id IN (SELECT followed_id FROM followed WHERE follower_id=?)
         GROUP BY fed.followed_id
@@ -284,20 +284,20 @@ postRoutes.route('/lastPost/').get(function (req, res) {
     }
 });
 
-//Last new post
+//Last new post owned
 postRoutes.route('/lastOwnPost/:uid').get(function (req, res) {
     var uid = req.params.uid;
     var page = req.query.page;
     var limit = 1;
     var offset = (page - 1) * limit;
-    if (uid &&page) {
+    if (uid && page) {
         let sql = `SELECT user.user_name,user.user_avatar,post.* FROM post 
                     LEFT JOIN user ON user.uID = post.user_id
                     WHERE post.post_status=1 and post.user_id=?
                     ORDER BY post.postID DESC
                     LIMIT ?,?`;
 
-        let query = mysql.format(sql, [parseInt(uid),offset, limit]);
+        let query = mysql.format(sql, [parseInt(uid), offset, limit]);
         console.log(query);
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
@@ -314,14 +314,14 @@ postRoutes.route('/lastOwnPost/:uid').get(function (req, res) {
     }
 });
 
-//violation 
+//insert a violation 
 postRoutes.route('/violation').post(function (req, res) {
     var data = req.body;
     if (data) {
         let sql = `INSERT INTO violation SET ?`;
 
         let query = mysql.format(sql, [data]);
-        
+
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
             connection.query(query, function (error, results, fields) {
@@ -336,5 +336,6 @@ postRoutes.route('/violation').post(function (req, res) {
         return res.status(400).send("400-Bad Request");
     }
 });
+
 
 module.exports = postRoutes;

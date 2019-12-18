@@ -58,14 +58,9 @@ chatRoute.route("/getConversationList/:uid").get(function (request, response) {
       connection.query(query, function (error, results, fields) {
         connection.release();
         if (error) {
-          throw error;
+          return res.status(404).send("404-Not Found");
         }
-        if (results.length == 0) {
-          return response
-            .status(404)
-            .send("Khong tim thay cuoc hoi thoai nao !!!!!");
-        }
-
+       
         return response.status(200).json(results);
       });
     });

@@ -46,7 +46,7 @@ petRoute.route('/getPetByuID').get(function (req, res) {
 petRoute.route('/getPetByuID2').get(function (req, res) {
   let uid = req.query.uid;
   if (uid) {
-    let sql = "SELECT p_name as label, petID as value FROM pet WHERE user_id= ? ORDER BY petID ASC";
+    let sql = "SELECT p_name as label, petID as value FROM pet WHERE user_id= ? and isRemove=0 ORDER BY petID ASC";
     let query = mysql.format(sql, parseInt(uid));
     console.log();
 
@@ -390,7 +390,7 @@ petRoute.route('/featureImgs/:pid').get(function (req, res) {
   let pet_id = req.params.pid;
   if (pet_id) {
     let sql = `SELECT * from pet_feature WHERE pet_id=? 
-    ORDER BY created_at DESC
+    ORDER BY uploaded_at DESC
     LIMIT 6`;
     let query = mysql.format(sql, [parseInt(pet_id)]);
     console.log(query);
