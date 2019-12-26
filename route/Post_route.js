@@ -106,6 +106,32 @@ postRoutes.route('/posts/:postid').put(function (req, res) {
         return res.status(400).send("400-Bad Request");
     }
 });
+
+//remove image from multimedia_storage
+postRoutes.route('/posts/:postid').delete(function (req, res) {
+    var postid = req.params.postid;
+    if (postid) {
+        let sql = `DELETE FROM multimedia_storage WHERE mURL IN 
+        (SELECT img_URL as mURL FROM post_images WHERE post_id=?)`;
+
+        let query = mysql.format(sql, [parseInt(postid)]);
+        console.log(query);
+
+        createConnection(function (err, connection) {
+            // do whatever you want with your connection here
+            connection.query(query, function (error, results, fields) {
+                connection.release();
+                if (error) {
+                    return res.status(404).send("404-Not Found");
+                }
+                return res.status(200).json(results);
+            });
+        });
+    } else {
+        return res.status(400).send("400-Bad Request");
+    }
+});
+
 //insert images to post_images
 postRoutes.route('/postImages').post(function (req, res) {
     var data = req.body;
