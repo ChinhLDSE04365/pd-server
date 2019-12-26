@@ -81,7 +81,7 @@ postRoutes.route('/posts').get(function (req, res) {
     }
 });
 
-//update post that posted by the postID
+//update post by the postID
 postRoutes.route('/posts/:postid').put(function (req, res) {
     var postid = req.params.postid;
 

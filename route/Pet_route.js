@@ -77,7 +77,7 @@ petRoute.route('/datingAu').get(function (req, res) {
     INNER JOIN user ON pet.user_id=user.uID
     INNER JOIN location ON pet.location_id = location.locaID
     LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
+    WHERE pet.p_status=1 and pet.isRemove=0 and pet.pb_id=? and pet.location_id=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
     (SELECT pet_id from pet_ignorance where user_id=?)
     GROUP BY pet.petID)`;
     let query1 = mysql.format(withclause1, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -86,7 +86,7 @@ petRoute.route('/datingAu').get(function (req, res) {
     INNER JOIN user ON pet.user_id=user.uID
     INNER JOIN location ON pet.location_id = location.locaID
     LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-    WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id!=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
+    WHERE pet.p_status=1 and pet.isRemove=0 and pet.pb_id=? and pet.location_id!=? and pet.p_gender!=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
     (SELECT pet_id from pet_ignorance where user_id=?)
     GROUP BY pet.petID)`;
     let query2 = mysql.format(withclause2, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -106,10 +106,10 @@ petRoute.route('/datingAu').get(function (req, res) {
     LIMIT 5)`;
 
     //5 pet Nhieu luot thich nhat nhung khac location  
-    let sql3 = `(SELECT T1.uID, T1.petID,T1.p_name,T1.p_dob,T1.p_avatar,T1.user_name,T1.user_avatar,T1.locaName, T1.noLike, COUNT(fl.follower_id) as noFollow FROM T1
-    LEFT JOIN followed as fl ON T1.uID=fl.followed_id
-    GROUP BY T1.petID
-    ORDER BY T1.noLike DESC
+    let sql3 = `(SELECT T2.uID, T2.petID,T2.p_name,T2.p_dob,T2.p_avatar,T2.user_name,T2.user_avatar,T2.locaName, T2.noLike, COUNT(fl.follower_id) as noFollow FROM T2
+    LEFT JOIN followed as fl ON T2.uID=fl.followed_id
+    GROUP BY T2.petID
+    ORDER BY T2.noLike DESC
     LIMIT 5)`;
 
     //5 pets moi nhat cung location 
@@ -150,7 +150,7 @@ petRoute.route('/datingMn').get(function (req, res) {
       INNER JOIN user ON pet.user_id=user.uID
       INNER JOIN location ON pet.location_id = location.locaID
       LEFT JOIN pet_reaction ON pet.petID=pet_reaction.pet_id
-      WHERE pet.p_status=1 and pet.pb_id=? and pet.location_id=? and pet.p_gender=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
+      WHERE pet.p_status=1 and pet.isRemove=0 and pet.pb_id=? and pet.location_id=? and pet.p_gender=? and user.uID!=? and user.user_status=1 and pet.petID NOT IN 
       (SELECT pet_id from pet_ignorance where user_id=?)
       GROUP BY pet.petID)`;
     let query1 = mysql.format(withclause1, [parseInt(pb_id), parseInt(loca_id), p_gender, parseInt(u_id), parseInt(u_id)]);
@@ -190,7 +190,7 @@ petRoute.route('/datingMn').get(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
-//get pet information by user_id and pet_id
+//get pet reaction by user_id and pet_id
 //that include number of like and check status about like/unlike of user
 petRoute.route('/getPInfor').get(function (req, res) {
   let pet_id = req.query.pid;
@@ -298,7 +298,7 @@ petRoute.route('/breeds/:psID').get(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
-//get species fro RNPickerSelect
+//get species for RNPickerSelect
 petRoute.route('/species').get(function (req, res) {
   let sql = `SELECT ps_name as label, psID as value FROM pet_species WHERE ps_status=1 ORDER BY psID ASC`;
   //thực hiện câu lệnh query
@@ -314,7 +314,7 @@ petRoute.route('/species').get(function (req, res) {
 
 });
 
-//get pes by pID
+//get pets by pID
 petRoute.route('/pets/:pid').get(function (req, res) {
   var pid = req.params.pid;
   if (pid) {

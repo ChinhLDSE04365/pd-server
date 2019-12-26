@@ -175,6 +175,7 @@ userRoutes.route('/checkFollow').get(function (req, res) {
   }
 });
 
+//follow
 userRoutes.route('/userFollow').post(function (req, res) {
   var data = req.body;
   if (data) {
@@ -195,6 +196,8 @@ userRoutes.route('/userFollow').post(function (req, res) {
     return res.status(400).send("400-Bad Request");
   }
 });
+
+//unfollow
 userRoutes.route('/userFollow').delete(function (req, res) {
   var myid = req.body.myid;
   var urid = req.body.urid;

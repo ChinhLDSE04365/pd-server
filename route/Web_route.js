@@ -171,11 +171,12 @@ webRoute.route('/mods/:accName').put(function (req, res) {
 
 //insert new moderator
 webRoute.route('/mods').post(function (req, res) {
-    var accName = req.body.accName;
-    if (accName) {
-        let sql = `INSERT INTO account(accountName,role) VALUES (?,'moderator') `;
+    var accName = req.body.accountName;
+    var acc_status = req.body.acc_status;
+    if (accName && acc_status) {
+        let sql = `INSERT INTO account(accountName,role,acc_status) VALUES (?,'moderator',?) `;
 
-        let query = mysql.format(sql, [accName]);
+        let query = mysql.format(sql, [accName,acc_status]);
 
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
@@ -192,12 +193,12 @@ webRoute.route('/mods').post(function (req, res) {
     }
 });
 
-//change mod's password
+//change password
 webRoute.route('/changePass/:accName').put(function (req, res) {
     var account = req.params.accName;
     var password = req.body.pass;
     if (account) {
-        let sql = `UPDATE account SET password=? WHERE accountName=? and role='moderator' `;
+        let sql = `UPDATE account SET password=? WHERE accountName=? `;
         let query = mysql.format(sql, [password, account]);
         createConnection(function (err, connection) {
             // do whatever you want with your connection here
